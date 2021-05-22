@@ -25,7 +25,7 @@ class UserType:
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name=None, user_type=None, password=None, **kwars):
+    def create_user(self, email, name=None, user_type=UserType.citizen, password=None, **kwars):
         if not email:
             raise ValueError('Необходимо указать Email')
 

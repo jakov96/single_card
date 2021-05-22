@@ -1,6 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from account.models import User, UserRegistrationConfirm
@@ -10,7 +10,7 @@ from utils.utils import CsrfExemptSessionAuthentication
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+    authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
 
     def post(self, request):
         email = request.data.get('email', '')
@@ -40,7 +40,7 @@ class LoginView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegistrationView(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+    authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
     serializer_class = RegistrationUserSerializer
 
     def post(self, request):
@@ -56,12 +56,14 @@ class RegistrationView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChangeUserPasswordView(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+    authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
     serializer_class = UserPasswordChangeSerializer
 
     def post(self, request):
         if request.user.is_authenticated:
-            serializer = self.serializer_class(context={'request': request}, instance=self.request.user, data=request.data)
+            serializer = self.serializer_class(context={'request': request}, instance=self.request.user,
+                                               data=request.data)
+
             if serializer.is_valid():
                 user = self.request.user
                 serializer.save()
@@ -73,12 +75,14 @@ class ChangeUserPasswordView(APIView):
                     'token': token.key
                 }, status=200)
 
+            return Response(serializer.errors, status=400)
+
         return Response({'success': False}, status=401)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserRegisterConfirmView(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+    authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
 
     def post(self, request):
         email = request.data.get('email', '')
