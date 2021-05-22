@@ -55,8 +55,13 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
-    def generate_token(self):
+    def get_or_generate_token(self):
         return Token.objects.get_or_create(user=self)
+
+    def refresh_token(self):
+        token = self.get_or_generate_token()
+        token.delete()
+        return self.get_or_generate_token()
 
     class Meta:
         verbose_name_plural = 'Аккаунты'

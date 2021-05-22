@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate
 from rest_framework import serializers
 from account.models import User
 
@@ -24,47 +23,57 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class RegistrationUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
+        required=True,
         max_length=128,
         min_length=8,
         write_only=True
     )
 
-    token = serializers.CharField(max_length=255, read_only=True)
+    confirm_password = serializers.CharField(
+        required=True,
+        max_length=128,
+        min_length=8,
+        write_only=True
+    )
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'token')
+        fields = ('email', 'password', 'confirm_password')
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError({'password': 'Пароли не совпадают'})
+
+        return attrs
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=128, write_only=True)
-    token = serializers.CharField(max_length=255, read_only=True)
+class UserPasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, max_length=128, min_length=8)
+    new_password = serializers.CharField(required=True, max_length=128, min_length=8)
+    confirm_password = serializers.CharField(required=True, max_length=128, min_length=8)
 
     def validate(self, attrs):
-        email = attrs.get('email', None)
-        password = attrs.get('password', None)
+        if not self.context['request'].user.check_password(attrs.get('old_password')):
+            raise serializers.ValidationError({'old_password': 'Неверный пароль'})
 
-        if not email:
-            raise serializers.ValidationError('Поле Email не может быть пустым')
+        if attrs.get('new_password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError({'new_password': 'Пароли не совпадают'})
 
-        if not password:
-            raise serializers.ValidationError('Поле Password не может быть пустым')
+        if attrs.get('old_password') == attrs.get('new_password'):
+            raise serializers.ValidationError({'new_password': 'Введенный пароль совпадает с текущим'})
 
-        user = authenticate(email=email, password=password)
+        return attrs
 
-        if not user:
-            raise serializers.ValidationError('Email или пароль введены неверно')
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        return instance
 
-        if not user.is_active:
-            raise serializers.ValidationError('Пользователь неактивен')
+    def create(self, validated_data):
+        pass
 
-        return {
-            'email': user.email,
-            'token': user.token
-        }
