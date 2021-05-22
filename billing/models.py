@@ -1,7 +1,5 @@
 from django.db import models
 
-from account.models import User
-
 
 class TransactionTypes:
     replenishment = 'replenishment'
@@ -48,7 +46,7 @@ class PaymentTransaction(models.Model):
     transaction_sum = models.FloatField(verbose_name='Сумма')
     description = models.TextField(verbose_name='Описание')
     date = models.DateTimeField(verbose_name='Дата', auto_now_add=True)
-    user = models.ForeignKey(User, verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.ForeignKey('account.User', verbose_name='Пользователь', on_delete=models.CASCADE)
     item_payment = models.ForeignKey(ItemPayment, verbose_name='Статья транзакции', on_delete=models.CASCADE)
 
     class Meta:

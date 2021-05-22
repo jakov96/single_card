@@ -1,3 +1,10 @@
 from django.contrib import admin
+from billing.models import PaymentTransaction, ItemPayment
 
-# Register your models here.
+
+class ItemPaymentModelAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'name': ('title',)}
+
+
+admin.site.register(PaymentTransaction)
+admin.site.register(ItemPayment, ItemPaymentModelAdmin)

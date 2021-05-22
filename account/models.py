@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.db import models
 from rest_framework.authtoken.models import Token
+from billing.manager import PaymentTransactionManager
 
 
 class UserType:
@@ -62,7 +63,8 @@ class User(AbstractUser):
         verbose_name = 'Аккаунт'
 
     def get_balance(self):
-        pass
+        return PaymentTransactionManager.get_balance(self)
+
 
 User._meta.get_field('email')._unique = True
 User._meta.get_field('email')._blank = False
