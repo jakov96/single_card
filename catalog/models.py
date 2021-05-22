@@ -1,27 +1,27 @@
 from django.db import models
-from account.models import User
-
-
-class CardType:
-    pass
+from imagemanager.models import BaseImage
 
 
 class Achievement(models.Model):
     title = models.CharField(verbose_name='Название', max_length=220)
     description = models.TextField(verbose_name='Описание')
-    user = models.ForeignKey(User, verbose_name='Пользователь', on_delete=models.CASCADE)
+    logo = models.ForeignKey('imagemanager.BaseImage', verbose_name='Лого', null=True, blank=True,
+                             on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Достижение'
         verbose_name_plural = 'Достижения'
 
     def __str__(self):
-        return '{0}: {1}'.format(self.user.email, self.title)
+        return self.title
+
+    def get_logo(self):
+        return self.logo.image_min
 
 
 class Card(models.Model):
     title = models.CharField(verbose_name='Название', max_length=200)
-    owner = models.ForeignKey(User, verbose_name='Владелец', on_delete=models.CASCADE)
+    owner = models.ForeignKey('account.User', verbose_name='Владелец', on_delete=models.CASCADE)
     card_type = models.CharField(verbose_name='Тип карты', max_length=200)
     balance = models.FloatField(verbose_name='Баланс', default=0)
 

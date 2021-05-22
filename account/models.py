@@ -3,6 +3,7 @@ from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.db import models
 from rest_framework.authtoken.models import Token
 from billing.manager import PaymentTransactionManager
+from catalog.models import Achievement
 
 
 class UserType:
@@ -47,6 +48,8 @@ class User(AbstractUser):
     username = models.CharField(db_index=True, max_length=255, unique=True)
     user_type = models.CharField(verbose_name='Тип пользоватля', max_length=120, choices=UserType.choices,
                                  default=UserType.citizen)
+    achievements = models.ManyToManyField(Achievement, verbose_name='Достижения', blank=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ()
 

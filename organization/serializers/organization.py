@@ -8,5 +8,5 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Organization
-        fields = ('title', 'address', 'phone', 'services')
+        fields = ('id', 'title', 'address', 'phone', 'services')
 
