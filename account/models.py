@@ -61,6 +61,8 @@ class User(AbstractUser):
         verbose_name_plural = 'Аккаунты'
         verbose_name = 'Аккаунт'
 
+    def get_balance(self):
+        pass
 
 User._meta.get_field('email')._unique = True
 User._meta.get_field('email')._blank = False
