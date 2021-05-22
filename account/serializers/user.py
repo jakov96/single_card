@@ -6,8 +6,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = (
+            'name',
             'email',
-            'password'
+            'password',
+            'user_type',
         )
         extra_kwargs = {
             'password': {
@@ -40,7 +42,7 @@ class RegistrationUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'confirm_password')
+        fields = ('name', 'email', 'user_type', 'password', 'confirm_password')
 
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('confirm_password'):

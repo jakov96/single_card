@@ -1,0 +1,22 @@
+{
+  "name": "Личный кабинет MTT Холдинг",
+  "version": "1.0.0",
+  "description": "Документация по проекту ЛК MTT Холдинг",
+  "title": "Документация ЛК MTT Холдинг",
+  "url": "127.0.0.1:8000",
+  "header": {
+    "title": "Правила работы с API",
+    "filename": "single_card/docs/header.md"
+  },
+  "footer": {
+    "title": "Поддержка",
+    "filename": "single_card/docs/footer.md"
+  },
+  "template": {
+    "withCompare": true,
+    "withGenerator": true
+  },
+  "order": [
+    "FileTypesList"
+  ]
+}

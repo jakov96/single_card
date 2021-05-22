@@ -2,6 +2,14 @@ from pytils.translit import slugify
 from billing.models import ItemPayment, PaymentTransaction, TransactionTypes
 
 
+class BaseBillingException(Exception):
+    pass
+
+
+class BalanceException(BaseBillingException):
+    pass
+
+
 class PaymentTransactionManager:
     @classmethod
     def get_or_create_item_payment(cls, title):
@@ -31,6 +39,24 @@ class PaymentTransactionManager:
                                                  item_payment=item_payment,
                                                  transaction_sum=transaction_sum,
                                                  description='Пополнение баланса')
+
+    @classmethod
+    def withdraw(cls, user, item_payment, description, transaction_sum):
+        """
+        Снятие по статье
+        :param user:
+        :param item_payment:
+        :param description:
+        :param transaction_sum:
+        :return:
+        """
+        if cls.get_balance(user) < transaction_sum:
+            raise BalanceException
+        return PaymentTransaction.objects.create(transaction_type=TransactionTypes.consumption,
+                                                 user=user,
+                                                 item_payment=item_payment,
+                                                 description=description,
+                                                 transaction_sum=transaction_sum)
 
     @classmethod
     def get_balance(cls, user):

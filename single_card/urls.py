@@ -19,13 +19,13 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, include
 from django.conf.urls.static import static
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('account.urls')),
     path('api/v1/catalog/', include('catalog.urls')),
     path('api/v1/organizations/', include('organization.urls')),
     path('api/v1/billing/', include('billing.urls')),
+    path('api/v1/route/', include('route.urls')),
     path('api/v1/imagemanager/', include('imagemanager.urls')),
 ]
 

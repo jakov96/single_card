@@ -1,4 +1,5 @@
 from django.db import models
+from catalog.models import Service
 
 
 class TransactionTypes:
@@ -58,3 +59,15 @@ class PaymentTransaction(models.Model):
 
     def get_transaction_type(self):
         return self.transaction_type
+
+
+class UserPaymentOrder(models.Model):
+    user = models.ForeignKey('account.User', verbose_name='Пользователь', on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+    date_start = models.DateTimeField(verbose_name='Дата и время', auto_now_add=True)
+    is_paid = models.BooleanField(verbose_name='Оплачен?', default=False)
+    is_canceled = models.BooleanField(verbose_name='Отменен?', default=False)
+
+    class Meta:
+        verbose_name = 'Заказ для оплаты'
+        verbose_name_plural = 'Заказы для оплаты'

@@ -1,10 +1,9 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from account.models import User
+from account.models import User, UserRegistrationConfirm
 from account.serializers.user import UserSerializer, RegistrationUserSerializer, UserPasswordChangeSerializer
 from utils.utils import CsrfExemptSessionAuthentication
 
@@ -18,7 +17,7 @@ class LoginView(APIView):
         password = request.data.get('password', '')
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email=email, is_confirm=True)
             if user.check_password(password):
                 token, _ = user.get_or_generate_token()
 
@@ -58,7 +57,6 @@ class RegistrationView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class ChangeUserPasswordView(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
-    parser_classes = (JSONParser,)
     serializer_class = UserPasswordChangeSerializer
 
     def post(self, request):
@@ -67,6 +65,7 @@ class ChangeUserPasswordView(APIView):
             if serializer.is_valid():
                 user = self.request.user
                 serializer.save()
+
                 token, _ = user.get_or_generate_token()
 
                 return Response({
@@ -75,3 +74,43 @@ class ChangeUserPasswordView(APIView):
                 }, status=200)
 
         return Response({'success': False}, status=401)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserRegisterConfirmView(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+
+    def post(self, request):
+        email = request.data.get('email', '')
+        code = int(request.data.get('code', 0))
+
+        try:
+            user = User.objects.get(email=email, is_confirm=False)
+            user_registration_confirm = UserRegistrationConfirm.objects.filter(user=user, code=code, is_used=False).first()
+            if user_registration_confirm:
+                user.is_confirm = True
+                user.save()
+
+                user_registration_confirm.is_user = True
+                user_registration_confirm.save()
+
+                return Response({
+                    'user': UserSerializer(instance=user).data
+                }, status=201)
+
+            return Response({
+                'non_field_error': 'Не удалось подтвердить регистрацию',
+                'errors': {
+                    'email': ['Поле заполнено неверно'],
+                    'code': ['Поле заполнено неверно']
+                }
+            }, status=400)
+
+        except User.DoesNotExist:
+            return Response({
+                'non_field_error': 'Невозможно войти с предоставленными учетными данными',
+                'errors': {
+                    'email': ['Поле заполнено неверно'],
+                    'password': ['Поле заполнено неверно']
+                }
+            }, status=400)
