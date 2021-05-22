@@ -47,7 +47,7 @@ class User(AbstractUser):
     user_type = models.CharField(verbose_name='Тип пользоватля', max_length=120, choices=UserType.choices,
                                  default=UserType.citizen)
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ('user_type',)
+    REQUIRED_FIELDS = ()
 
     objects = UserManager()
 
