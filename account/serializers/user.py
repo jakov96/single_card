@@ -10,6 +10,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             'email',
             'password',
             'user_type',
+            'account_number',
+            'is_confirm',
+            'is_esia_confirm',
         )
         extra_kwargs = {
             'password': {

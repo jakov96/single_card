@@ -16,7 +16,9 @@ class Achievement(models.Model):
         return self.title
 
     def get_logo(self):
-        return self.logo.image_min
+        if self.logo:
+            return self.logo.get_image_min_url()
+        return None
 
 
 class Card(models.Model):

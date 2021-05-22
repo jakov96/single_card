@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from account.models import User, UserRegistrationConfirm
+from account.models import User, UserRegistrationConfirm, UserType
 from account.serializers.user import UserSerializer, RegistrationUserSerializer, UserPasswordChangeSerializer
 from utils.utils import CsrfExemptSessionAuthentication
 
@@ -118,3 +118,29 @@ class UserRegisterConfirmView(APIView):
                     'password': ['Поле заполнено неверно']
                 }
             }, status=400)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ESIAUserConfirmView(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
+    serializer_class = UserSerializer
+
+    def post(self, request):
+        if self.request.user.is_authenticated:
+            email = request.data.get('email', '')
+            user_type = request.data.get('user_type', '')
+
+            if user_type == UserType.citizen:
+                try:
+                    user = User.objects.get(email=email, is_confirm=True, is_esia_confirm=False, user_type=user_type)
+                    user.is_esia_confirm = True
+                    user.save()
+                    serializer = self.serializer_class(user)
+
+                    return Response(serializer.data, status=200)
+                except User.DoesNotExist:
+                    return Response({'success': False, 'message': 'Пользователь уже подтвержден'}, status=400)
+
+            return Response({'success': False, 'message': 'Недопустимый тип пользователя'}, status=400)
+
+        return Response({'success': False}, status=401)

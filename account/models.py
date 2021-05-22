@@ -3,6 +3,8 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.template.loader import get_template
 from django.conf import settings
 from rest_framework.authtoken.models import Token
@@ -25,14 +27,16 @@ class UserType:
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name=None, user_type=UserType.citizen, password=None, **kwars):
+    def create_user(self, email, name=None, user_type=UserType.citizen, is_confirm=False, password=None, **kwars):
         if not email:
             raise ValueError('Необходимо указать Email')
 
         user = self.model(
+            username=self.normalize_email(email),
             email=self.normalize_email(email),
             name=name,
-            user_type=user_type
+            user_type=user_type,
+            is_confirm=is_confirm
         )
 
         user.set_password(password)
@@ -49,6 +53,7 @@ class UserManager(BaseUserManager):
         user = self.create_user(
             email=email,
             password=password,
+            is_confirm=True
         )
         user.is_superuser = True
         user.is_staff = True
@@ -59,10 +64,11 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     name = models.CharField(verbose_name='Имя', max_length=200, null=True, blank=True)
     email = models.EmailField(verbose_name='Электронная почта', blank=False, unique=True)
-    username = models.CharField(db_index=True, max_length=255, unique=True)
     user_type = models.CharField(verbose_name='Тип пользоватля', max_length=120, choices=UserType.choices,
                                  default=UserType.citizen, null=True, blank=True)
     is_confirm = models.BooleanField(verbose_name='Подтвержден?', default=False)
+    is_esia_confirm = models.BooleanField(verbose_name='Подтвержден через Госуслуги?', default=False)
+    account_number = models.CharField(verbose_name='Номер счета', max_length=120, unique=True)
     achievements = models.ManyToManyField(Achievement, verbose_name='Достижения', blank=True)
 
     USERNAME_FIELD = 'email'
@@ -131,3 +137,10 @@ class UserRegistrationConfirm(models.Model):
 User._meta.get_field('email')._unique = True
 User._meta.get_field('email')._blank = False
 User._meta.get_field('username')._unique = False
+
+
+@receiver(post_save, sender=User)
+def handle(instance, **kwargs):
+    if not instance.account_number:
+        number = randint(10000, 99999)
+        User.objects.filter(id=instance.id).update(account_number='{0}-{1}'.format(number, instance.id))
