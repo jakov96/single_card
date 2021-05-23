@@ -10,6 +10,9 @@ from utils.utils import CsrfExemptSessionAuthentication
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
+    """
+    Авторизация
+    """
     authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
 
     def post(self, request):
@@ -40,6 +43,10 @@ class LoginView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegistrationView(APIView):
+    """
+    Регистрация
+    """
+
     authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
     serializer_class = RegistrationUserSerializer
 
@@ -56,6 +63,10 @@ class RegistrationView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChangeUserPasswordView(APIView):
+    """
+    Изменение пароля
+    """
+
     authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
     serializer_class = UserPasswordChangeSerializer
 
@@ -82,6 +93,8 @@ class ChangeUserPasswordView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserRegisterConfirmView(APIView):
+    """Подтверждение регистрации"""
+
     authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
 
     def post(self, request):
@@ -90,7 +103,8 @@ class UserRegisterConfirmView(APIView):
 
         try:
             user = User.objects.get(email=email, is_confirm=False)
-            user_registration_confirm = UserRegistrationConfirm.objects.filter(user=user, code=code, is_used=False).first()
+            user_registration_confirm = UserRegistrationConfirm.objects.filter(user=user, code=code,
+                                                                               is_used=False).first()
             if user_registration_confirm:
                 user.is_confirm = True
                 user.save()
@@ -120,8 +134,11 @@ class UserRegisterConfirmView(APIView):
             }, status=400)
 
 
+# TODO необходимо API Госуслуг
 @method_decorator(csrf_exempt, name='dispatch')
 class ESIAUserConfirmView(APIView):
+    """Подтверждение пользователя с использованием ЕСИА"""
+
     authentication_classes = (CsrfExemptSessionAuthentication, TokenAuthentication)
     serializer_class = UserSerializer
 

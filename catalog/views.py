@@ -1,6 +1,3 @@
-import json
-
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +7,10 @@ from catalog.serializers.catalog import CategorySerializer
 
 
 class CategoryListView(APIView):
+    """
+    Получение услуг и категорий
+    """
+
     serializer_class = CategorySerializer
 
     def get(self, request):
@@ -20,6 +21,10 @@ class CategoryListView(APIView):
 
 
 class AchievementListView(APIView):
+    """
+    Получение достижение пользователя
+    """
+
     permission_classes = (IsAuthenticated,)
     serializer_class = AchievementSerializer
 

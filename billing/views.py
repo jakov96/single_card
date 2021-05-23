@@ -8,6 +8,10 @@ from billing.serializers.transaction import TransactionSerializer
 
 
 class BalanceAPIView(APIView):
+    """
+    Получение баланса текущего пользователя
+    """
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -21,6 +25,10 @@ class BalanceAPIView(APIView):
 
 
 class RechargeAPIView(APIView):
+    """
+    Пополнение баланса
+    """
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -36,6 +44,10 @@ class RechargeAPIView(APIView):
 
 
 class TransactionsListView(APIView):
+    """
+    Создание транзакции
+    """
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = TransactionSerializer
