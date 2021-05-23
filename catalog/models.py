@@ -21,20 +21,6 @@ class Achievement(models.Model):
         return None
 
 
-class Card(models.Model):
-    title = models.CharField(verbose_name='Название', max_length=200)
-    owner = models.ForeignKey('account.User', verbose_name='Владелец', on_delete=models.CASCADE)
-    card_type = models.CharField(verbose_name='Тип карты', max_length=200)
-    balance = models.FloatField(verbose_name='Баланс', default=0)
-
-    class Meta:
-        verbose_name = 'Карта'
-        verbose_name_plural = 'Карты'
-
-    def __str__(self):
-        return '{0}: {1}'.format(self.title, self.owner.email)
-
-
 class Category(models.Model):
     title = models.CharField(verbose_name='Название', max_length=200)
     slug = models.SlugField(help_text='Сгенерируется автоматически', unique=True)
@@ -67,3 +53,17 @@ class Service(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Card(models.Model):
+    title = models.CharField(verbose_name='Название', max_length=200)
+    owner = models.ForeignKey('account.User', verbose_name='Владелец', on_delete=models.CASCADE)
+    card_type = models.CharField(verbose_name='Тип карты', max_length=200)
+    balance = models.FloatField(verbose_name='Баланс', default=0)
+
+    class Meta:
+        verbose_name = 'Карта'
+        verbose_name_plural = 'Карты'
+
+    def __str__(self):
+        return '{0}: {1}'.format(self.title, self.owner.email)

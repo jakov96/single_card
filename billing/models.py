@@ -23,10 +23,12 @@ class PaymentTypes:
 
     names = {
         card: 'Банковская карта',
+        phone_number: 'По номеру телефона'
     }
 
     choices = (
         (card, names[card]),
+        (phone_number, names[phone_number]),
     )
 
 
